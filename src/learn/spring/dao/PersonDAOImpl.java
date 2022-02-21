@@ -2,10 +2,13 @@ package learn.spring.dao;
 
 import java.util.List;
 
+
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import learn.spring.model.Person;
@@ -14,23 +17,30 @@ import learn.spring.model.PersonMapper;
 @Component
 public class PersonDAOImpl implements PersonDAO {
 
-	JdbcTemplate jdbcTemplate;
+	//JdbcTemplate jdbcTemplate;
+	NamedParameterJdbcTemplate jdbcTemplate;
 
-	private final String SQL_FIND_PERSON = "select * from people where id = ?";
-	private final String SQL_DELETE_PERSON = "delete from people where id = ?";
-	private final String SQL_UPDATE_PERSON = "update people set first_name = ?, last_name = ?, age  = ? where id = ?";
+	private final String SQL_FIND_PERSON = "select * from people where id = :id";
+	private final String SQL_DELETE_PERSON = "delete from people where id = :id";
+	private final String SQL_UPDATE_PERSON = "update people set first_name = :firstName, last_name = :lastName, age  = :age where id = :id";
 	private final String SQL_GET_ALL = "select * from people";
-	private final String SQL_INSERT_PERSON = "insert into people(id, first_name, last_name, age) values(?,?,?,?)";
+	private final String SQL_INSERT_PERSON = "insert into people(id, first_name, last_name, age) values(:id,:firstName,:lastName,:age)";
 
 	@Autowired
 	public PersonDAOImpl(DataSource dataSource) {
-		jdbcTemplate = new JdbcTemplate(dataSource);
+		//jdbcTemplate = new JdbcTemplate(dataSource);
+		jdbcTemplate = new NamedParameterJdbcTemplate(dataSource);
 	}
 
 	public Person getPersonById(Long id) {
 		//return jdbcTemplate.queryForObject(SQL_FIND_PERSON, new Object[] {id}, new PersonMapper());
 		//return (Person)(jdbcTemplate.queryForList(SQL_FIND_PERSON, new PersonMapper(), new Object[] {id} )).get(0);
-		return jdbcTemplate.queryForObject("SELECT * FROM people WHERE id=?",new PersonMapper(), id);
+		//return jdbcTemplate.queryForObject("SELECT * FROM people WHERE id=?",new PersonMapper(), id);
+		
+		MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
+		mapSqlParameterSource.addValue("id", id);
+		
+		return jdbcTemplate.queryForObject(SQL_FIND_PERSON, mapSqlParameterSource, new PersonMapper());
 	}
 
 	public List<Person> getAllPersons() {
@@ -38,16 +48,34 @@ public class PersonDAOImpl implements PersonDAO {
 	}
 
 	public boolean deletePerson(Person person) {
-		return jdbcTemplate.update(SQL_DELETE_PERSON, person.getId()) > 0;
+		
+		MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
+		mapSqlParameterSource.addValue("id", person.getId());
+		
+		return jdbcTemplate.update(SQL_DELETE_PERSON, mapSqlParameterSource) > 0;
 	}
 
 	public boolean updatePerson(Person person) {
-		return jdbcTemplate.update(SQL_UPDATE_PERSON, person.getFirstName(), person.getLastName(), person.getAge(),
-				person.getId()) > 0;
+		
+		MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
+		mapSqlParameterSource.addValue("id", person.getId());
+		mapSqlParameterSource.addValue("firstName", person.getFirstName());
+		mapSqlParameterSource.addValue("lastName", person.getLastName());
+		mapSqlParameterSource.addValue("age", person.getAge());
+		
+		  return jdbcTemplate.update(SQL_UPDATE_PERSON, mapSqlParameterSource) > 0;
+		 
 	}
 
 	public boolean createPerson(Person person) {
-		return jdbcTemplate.update(SQL_INSERT_PERSON, person.getId(), person.getFirstName(), person.getLastName(),
-				person.getAge()) > 0;
+		
+		MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
+		mapSqlParameterSource.addValue("id", person.getId());
+		mapSqlParameterSource.addValue("firstName", person.getFirstName());
+		mapSqlParameterSource.addValue("lastName", person.getLastName());
+		mapSqlParameterSource.addValue("age", person.getAge());
+		
+		  return jdbcTemplate.update(SQL_INSERT_PERSON, mapSqlParameterSource) > 0;
+		 
 	}
 }

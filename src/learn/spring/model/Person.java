@@ -1,7 +1,7 @@
 package learn.spring.model;
 
 public class Person {
-	private Long id;
+	private Integer id;
 	private Integer age;
 	private String firstName;
 	private String lastName;
@@ -9,18 +9,18 @@ public class Person {
 	public Person() {
 	}
 
-	public Person(Long id, Integer age, String firstName, String lastName) {
+	public Person(Integer id, Integer age, String firstName, String lastName) {
 		this.id = id;
 		this.age = age;
 		this.firstName = firstName;
 		this.lastName = lastName;
 	}
 
-	public Long getId() {
+	public Integer getId() {
 		return id;
 	}
 
-	public void setId(Long id) {
+	public void setId(Integer id) {
 		this.id = id;
 	}
 
